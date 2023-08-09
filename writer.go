@@ -115,11 +115,10 @@ func (w *Writer) StringContents(s string) {
 
 	p := 0 // last non-escape symbol
 
-	for i := 0; i < len(s); {
+	for i := 0; i < len(s); i++ {
 
 		if c := s[i]; c < utf8.RuneSelf {
 			if htmlSafeSet[c] {
-				i++
 				continue
 			}
 
@@ -142,8 +141,7 @@ func (w *Writer) StringContents(s string) {
 				w.RawByte(chars[c&0xf])
 			}
 
-			i++
-			p = i
+			p = i + 1
 			continue
 		}
 
@@ -152,8 +150,8 @@ func (w *Writer) StringContents(s string) {
 		if runeValue == utf8.RuneError && runeWidth == 1 {
 			w.RawString(s[p:i])
 			w.RawString(`\ufffd`)
-			i++
-			p = i
+
+			p = i + 1
 			continue
 		}
 
@@ -162,11 +160,11 @@ func (w *Writer) StringContents(s string) {
 			w.RawString(s[p:i])
 			w.RawString(`\u202`)
 			w.RawByte(chars[runeValue&0xf])
-			i += runeWidth
-			p = i
+			i += runeWidth - 1
+			p = i + 1
 			continue
 		}
-		i += runeWidth
+		i += runeWidth - 1
 	}
 	w.RawString(s[p:])
 }
